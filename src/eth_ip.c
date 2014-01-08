@@ -9,10 +9,10 @@ uint16_t ethernet_ip_recieve(ip_packet* p, address* myaddress,
   
   switch (p->protocol) {
   case IP_PROTO_ICMP:
-    replyLen = ethernet_ip_handleICMP((icmp_packet*)p->data, myaddress);
+    replyLen = ethernet_ip_handleICMP((icmp_packet*)(p + 1), myaddress);
     break;
   case IP_PROTO_UDP:
-    replyLen = ethernet_ip_handleUDP((udp_packet*)p->data, myaddress);
+    replyLen = ethernet_ip_handleUDP((udp_packet*)(p + 1), myaddress);
     break;
   case IP_PROTO_TCP:
     // handle tcp packets
