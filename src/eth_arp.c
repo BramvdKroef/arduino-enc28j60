@@ -3,8 +3,7 @@
 uint16_t ethernet_arp_recieve(arp_packet* p, address* myaddress,
                               address* target) {
   arp_eth_ip_data* data;
-  uint8_t i;
-  
+
   // hardware type is ethernet, protocol is ipv4 & target ip is my
   // ip  
   if (p->hardware_type != ARP_HARDWARE_TYPE_ETH ||
@@ -54,6 +53,7 @@ boolean ethernet_arp_discover(uint8_t* ip, address* myaddress,
   memcpy(data->sender_ip, myaddress->ip, 6);
 
   ethernet_send(frame, myaddress->mac, ethernet_broadcast_mac, 8 + 20);
+  return true;
 }
 
 boolean ethernet_arp_getMac(address* target, address* myaddress,
