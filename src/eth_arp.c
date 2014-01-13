@@ -58,8 +58,11 @@ boolean ethernet_arp_discover(uint8_t* ip, address* myaddress,
 
 boolean ethernet_arp_getMac(address* target, address* myaddress,
                          ethernet_frame* frame, uint16_t* timeout) {
-  if (target->mac[0] != 0) 
-    return true;
+  int i;
+  for (i = 0; i < 6; i++) {
+    if (target->mac[i] != 0)
+      return true;
+  }
   
   if (*timeout == 0) { 
     ethernet_arp_discover(target->ip, myaddress, frame);
