@@ -1,6 +1,11 @@
 #ifndef __NETSTRUCT_H__
 #define __NETSTRUCT_H__
 
+// Reverse byte order in 16 bit values
+// Arduino stores types in little-endian order while ethernet packets
+// use big-endian.
+#define reverse16(x) x << 8 | x >> 8
+
 typedef struct {
   uint8_t destination[6];
   uint8_t source[6];

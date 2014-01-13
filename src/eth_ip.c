@@ -8,7 +8,7 @@ uint16_t ethernet_ip_recieve(ip_packet* p, address* myaddress,
     return 0;
 
   uint16_t replyLen = 0;
-  length = ((p->length >> 8) & 0xFF) | ((p->length << 8) & 0xFF00);
+  length = reverse16(p->length);
   
   switch (p->protocol) {
   case IP_PROTO_ICMP:
@@ -27,11 +27,10 @@ uint16_t ethernet_ip_recieve(ip_packet* p, address* myaddress,
     memcpy(p->destination, p->source, 4);
     memcpy(p->source, myaddress->ip, 4);
     length = 20 + replyLen;
-    p->length = ((length >> 8) & 0xFF) | ((length << 8) & 0xFF00);
+    p->length = reverse16(length);
     p->checksum = 0;
     p->checksum = ethernet_checksum((uint8_t*)p, length);
-    p->checksum = ((p->checksum >> 8) & 0xFF) |
-      ((p->checksum << 8) & 0xFF00);
+    p->checksum = reverse16(p->checksum);
 
     return length;
   }
@@ -44,8 +43,8 @@ uint16_t ethernet_ip_handleICMP(icmp_packet* p, size_t length, address* myaddres
     p->type = ICMP_TYPE_ECHO_REPLY;
     p->checksum = 0;
     p->checksum = ethernet_checksum((uint8_t*)p, length);
-    p->checksum = ((p->checksum >> 8) & 0xFF) |
-      ((p->checksum << 8) & 0xFF00);
+    p->checksum = reverse16(p->checksum);
+
     return length;
   }
   return 0;
@@ -53,10 +52,9 @@ uint16_t ethernet_ip_handleICMP(icmp_packet* p, size_t length, address* myaddres
 
 uint16_t ethernet_ip_handleUDP(udp_packet* p, address* myaddress) {
   uint16_t port = p->dest_port;
-  p->dest_port = ((p->dest_port >> 8) & 0xFF) | ((p->dest_port << 8)
-                                                 & 0xFF00);
-  uint16_t length = ((p->length >> 8) & 0xFF) | ((p->length << 8)
-                                                 & 0xFF00);
+  p->dest_port = reverse16(p->dest_port);
+                                         
+  uint16_t length = reverse16(p->length);
   uint16_t replyLen = handleUDPData(&p->dest_port, (uint8_t*)(p + 1),
                                     length - 8); 
   
@@ -81,10 +79,11 @@ void ethernet_ip_send(ethernet_frame* frame, address* myaddress,
   ip->id = 1;
 
   ip->length = 20 + length;
+  ip->length = reverse16(ip->length);
   ip->checksum = 0;
   ip->checksum = ethernet_checksum((uint8_t*)ip, 20);
-
-  ethernet_send(frame, myaddress->mac, destination->mac, ip->length);
+  ip->checksum = reverse16(ip->checksum);
+  ethernet_send(frame, myaddress->mac, destination->mac, 20 + length);
 }
 
 
@@ -98,9 +97,10 @@ void ethernet_ip_sendUDP(ethernet_frame* frame,
     
   udp_packet* udp = (udp_packet*)(ip + 1);
   memcpy((uint8_t*)(udp + 1), data, length);
-  udp->src_port = src_port;
-  udp->dest_port = dest_port;
+  udp->src_port = reverse16(src_port);
+  udp->dest_port = reverse16(dest_port);
   udp->length = length + 8;
+  udp->length = reverse16(udp->length);
   
-  ethernet_ip_send(frame, myaddress, destination, udp->length);
+  ethernet_ip_send(frame, myaddress, destination, length + 8);
 }
