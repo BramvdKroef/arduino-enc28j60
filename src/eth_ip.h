@@ -10,7 +10,7 @@ uint16_t handleUDPData(uint16_t* port, uint8_t* data, uint16_t length);
 
 uint16_t ethernet_ip_recieve(ip_packet* p, address* myaddress,
                              address* target);
-uint16_t ethernet_ip_handleICMP(icmp_packet* p, address* myaddress);
+uint16_t ethernet_ip_handleICMP(icmp_packet* p, size_t length, address* myaddress);
 uint16_t ethernet_ip_handleUDP(udp_packet* p, address* myaddress);
 
 

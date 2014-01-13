@@ -11,7 +11,7 @@ typedef struct {
 } address ;
 
 // Broadcast mac address
-//static uint8_t ethernet_broadcast_mac[6] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
+static uint8_t ethernet_broadcast_mac[6] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
 
 /**
  * Implement to handle incoming arp packets

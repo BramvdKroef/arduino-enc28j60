@@ -2,14 +2,18 @@
 
 uint16_t ethernet_ip_recieve(ip_packet* p, address* myaddress,
                              address* target) {
+  uint16_t length;
+  
   if (memcmp(p->destination, myaddress->ip, 4) != 0)
     return 0;
 
   uint16_t replyLen = 0;
+  length = ((p->length >> 8) & 0xFF) | ((p->length << 8) & 0xFF00);
   
   switch (p->protocol) {
   case IP_PROTO_ICMP:
-    replyLen = ethernet_ip_handleICMP((icmp_packet*)(p + 1), myaddress);
+    replyLen = ethernet_ip_handleICMP((icmp_packet*)(p + 1),
+                                      length - sizeof(ip_packet), myaddress);
     break;
   case IP_PROTO_UDP:
     replyLen = ethernet_ip_handleUDP((udp_packet*)(p + 1), myaddress);
@@ -22,28 +26,39 @@ uint16_t ethernet_ip_recieve(ip_packet* p, address* myaddress,
   if (replyLen > 0) {
     memcpy(p->destination, p->source, 4);
     memcpy(p->source, myaddress->ip, 4);
+    length = 20 + replyLen;
+    p->length = ((length >> 8) & 0xFF) | ((length << 8) & 0xFF00);
     p->checksum = 0;
-    p->checksum = ethernet_checksum((uint8_t*)p, 20);
-    return 20 + replyLen;
+    p->checksum = ethernet_checksum((uint8_t*)p, length);
+    p->checksum = ((p->checksum >> 8) & 0xFF) |
+      ((p->checksum << 8) & 0xFF00);
+
+    return length;
   }
   return 0;
 }
 
-uint16_t ethernet_ip_handleICMP(icmp_packet* p, address* myaddress) {
+uint16_t ethernet_ip_handleICMP(icmp_packet* p, size_t length, address* myaddress) {
   if (p->type == ICMP_TYPE_ECHO_REQ) {
     // reply to ping requests
     p->type = ICMP_TYPE_ECHO_REPLY;
     p->checksum = 0;
-    p->checksum = ethernet_checksum((uint8_t*)p, 8);
-    return 8;
+    p->checksum = ethernet_checksum((uint8_t*)p, length);
+    p->checksum = ((p->checksum >> 8) & 0xFF) |
+      ((p->checksum << 8) & 0xFF00);
+    return length;
   }
   return 0;
 }
 
 uint16_t ethernet_ip_handleUDP(udp_packet* p, address* myaddress) {
   uint16_t port = p->dest_port;
+  p->dest_port = ((p->dest_port >> 8) & 0xFF) | ((p->dest_port << 8)
+                                                 & 0xFF00);
+  uint16_t length = ((p->length >> 8) & 0xFF) | ((p->length << 8)
+                                                 & 0xFF00);
   uint16_t replyLen = handleUDPData(&p->dest_port, (uint8_t*)(p + 1),
-                                    p->length - 8); 
+                                    length - 8); 
   
   if (replyLen > 0)  {
     p->src_port = port;

@@ -2,14 +2,14 @@
 #define __NETSTRUCT_H__
 
 typedef struct {
-  uint8_t source[6];
   uint8_t destination[6];
+  uint8_t source[6];
   uint16_t ethertype;
   //uint32_t checksum;
 } ethernet_frame;
 
-#define ETHTYPE_IP	0x0800
-#define ETHTYPE_ARP	0x0806
+#define ETHTYPE_IP	0x0008
+#define ETHTYPE_ARP	0x0608
 
 typedef struct {
   uint16_t hardware_type;
@@ -19,10 +19,10 @@ typedef struct {
   uint16_t operation;
 } arp_packet;
 
-#define ARP_HARDWARE_TYPE_ETH 0x01
-#define ARP_PROTOCOL_TYPE_IP4 0x0800
-#define ARP_OPER_REQUEST      0x01
-#define ARP_OPER_REPLY        0x02
+#define ARP_HARDWARE_TYPE_ETH 0x0100
+#define ARP_PROTOCOL_TYPE_IP4 0x0008
+#define ARP_OPER_REQUEST      0x0100
+#define ARP_OPER_REPLY        0x0200
 
 typedef struct {
   uint8_t sender_mac[6];
