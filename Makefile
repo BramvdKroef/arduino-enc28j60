@@ -50,6 +50,7 @@ OBJCOPY = avr-objcopy
 STRIP   = avr-strip
 AVRDUDE = avrdude
 SIZE	= avr-size
+AR      = avr-ar
 
 #########################################
 # Hardware variables
@@ -115,6 +116,7 @@ export CFLAGS
 export CXXFLAGS
 
 BINARY = binary
+LIBRARY = library.a
 
 ########################################
 # Rules
@@ -165,6 +167,9 @@ $(BINARY).hex: $(BINARY).elf
 $(BINARY).elf: $(BUILD_DIR) $(LIBARDUINO) $(OBJ)
 	$(CXX) $(LDFLAGS) $(OBJ) -o $(BINARY).elf \
 	-L$(LIBARDUINO_DIR) -larduino
+
+$(LIBRARY): $(BUILD_DIR) $(OBJ)
+	$(AR) rcs $(LIBRARY) $(OBJ)
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	$(COMPILE.c) $(OUTPUT_OPTION) $<
