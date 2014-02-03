@@ -1,5 +1,4 @@
 #include "ethernet.h"
-#include "Arduino.h"
 
 void ethernet_setup(address* myaddress){
 
