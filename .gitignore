@@ -1,4 +1,4 @@
 binary.elf
 binary.hex
 build
-libarduino/libarduino.a
+lib*.a

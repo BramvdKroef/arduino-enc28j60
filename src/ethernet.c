@@ -82,11 +82,12 @@ void ethernet_send(ethernet_frame* frame, uint8_t* source_mac,
 
 
 uint16_t ethernet_checksum(uint8_t* data, uint8_t len) {
+  uint16_t* i = (uint16_t*)data;
   uint32_t checksum = 0;
   
   while (len > 1)  {
-    checksum += ((*data << 8) & 0xFF00) | (*(data + 1) & 0xFF);
-    data += 2;
+    checksum += reverse16(*i);
+    i++;
     len -= 2;
   }
 
