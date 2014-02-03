@@ -27,9 +27,10 @@ uint16_t ethernet_ip_recieve(ip_packet* p, address* myaddress,
     memcpy(p->destination, p->source, 4);
     memcpy(p->source, myaddress->ip, 4);
     length = 20 + replyLen;
+    p->id = p->id + 1;
     p->length = ((length >> 8) & 0xFF) | ((length << 8) & 0xFF00);
     p->checksum = 0;
-    p->checksum = ethernet_checksum((uint8_t*)p, length);
+    p->checksum = ethernet_checksum((uint8_t*)p, 20);
     p->checksum = ((p->checksum >> 8) & 0xFF) |
       ((p->checksum << 8) & 0xFF00);
 
@@ -57,11 +58,13 @@ uint16_t ethernet_ip_handleUDP(udp_packet* p, address* myaddress) {
                                                  & 0xFF00);
   uint16_t length = ((p->length >> 8) & 0xFF) | ((p->length << 8)
                                                  & 0xFF00);
-  uint16_t replyLen = handleUDPData(&p->dest_port, (uint8_t*)(p + 1),
-                                    length - 8); 
+  uint16_t replyLen = 8 + handleUDPData(&p->dest_port, (uint8_t*)(p + 1),
+                                        length - 8); 
   
   if (replyLen > 0)  {
+    p->dest_port = p->src_port;
     p->src_port = port;
+    p->length = ((replyLen >> 8) & 0xFF) | ((replyLen << 8) & 0xFF00);
     p->checksum = 0; // checksum is optional
   }
   return replyLen;
